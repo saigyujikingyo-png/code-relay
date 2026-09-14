@@ -14,7 +14,7 @@ The local workflow includes frozen source snapshots, bounded parallel calls, per
 
 ELM users may configure multiple OPUS, SOL, TERRA, QWEN or other profiles using their actual endpoint and API model identifiers. Their current availability and permissions have not been verified. No paid API or live ELM call is included in the synthetic acceptance results, and no token-cost saving or Terra max benchmark is claimed.
 
-See [installation and recovery](docs/INSTALL.md), [architecture](docs/ARCHITECTURE.md), [compatibility](docs/COMPATIBILITY.md), [privacy](docs/PRIVACY.md) and the [acceptance record](verification/2026-09-14-preview.md).
+All seven tools publish versioned output schemas and validate results before delivery. Null usage or cost means unavailable; candidate artifact metadata does not establish correctness or host delivery. See [output contracts](docs/OUTPUT_CONTRACTS.md), [installation and recovery](docs/INSTALL.md), [architecture](docs/ARCHITECTURE.md), [compatibility](docs/COMPATIBILITY.md), [privacy](docs/PRIVACY.md) and the [acceptance record](verification/2026-09-14-preview.md).
 
 For development, use Python 3.11+ and run:
 

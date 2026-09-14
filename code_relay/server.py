@@ -9,6 +9,7 @@ from pathlib import Path
 from . import __version__
 from .common import RelayError, digest, json_bytes, require, strict_json
 from .config import config_path, load_config
+from .contracts import CONTRACT_VERSION, OUTPUT_SCHEMAS, error_output, validate_output
 from .core import Relay
 from .providers import ProviderError
 
@@ -49,6 +50,8 @@ TOOLS = [
     {"name": "relay_setup", "description": "Open local connection settings for the user to configure multiple models, credentials and workspace grants. Never asks for API keys in chat.",
      "inputSchema": schema(), "annotations": {"readOnlyHint": False, "destructiveHint": False, "openWorldHint": False}},
 ]
+for tool in TOOLS:
+    tool["outputSchema"] = OUTPUT_SCHEMAS[tool["name"]]
 
 
 def validate(value, definition):
@@ -135,21 +138,36 @@ class Server:
         selected = next((tool for tool in TOOLS if tool["name"] == params.get("name")), None)
         if selected is None:
             return reply | {"error": {"code": -32602, "message": "Unknown tool."}}
+        result = None
+        arguments = params.get("arguments", {})
         try:
-            arguments = params.get("arguments", {})
             validate(arguments, selected["inputSchema"])
             if selected["name"] == "relay_setup":
                 result = open_setup()
             else:
                 function = getattr(self.get_relay(), selected["name"].removeprefix("relay_"))
                 result = function(**arguments)
-            failed = False
+            if not isinstance(result, dict):
+                raise RelayError("invalid_output", "The local result is not an object. Inspect status before retrying.")
+            result = {**result, "contract_version": CONTRACT_VERSION}
+            validate_output(selected["name"], result)
+            for key in ("plan_id", "task_id"):
+                if key in arguments:
+                    require(result.get(key) == arguments[key], "invalid_output",
+                            "The local result does not match the requested identifier. Inspect status before retrying.")
+            failed = "error" in result
         except (RelayError, ProviderError) as exc:
-            result = {"error": {"code": exc.code, "message": str(exc)}}
+            result = error_output(exc.code, str(exc), arguments, result)
             failed = True
         except Exception:
-            result = {"error": {"code": "internal_error", "message": "The local operation failed. Check local settings and job status; do not automatically resend."}}
+            result = error_output("internal_error", "The local operation failed. Check local settings and job status; do not automatically resend.", arguments, result)
             failed = True
+        try:
+            validate_output(selected["name"], result)
+        except RelayError:
+            result = error_output("invalid_output", "The local result failed its output contract. Inspect status before retrying; no request was repeated.", arguments, result)
+            failed = True
+            validate_output(selected["name"], result)
         return reply | {"result": {"content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}],
                                     "structuredContent": result, "isError": failed}}
 

@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import difflib
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -14,7 +15,7 @@ import time
 import uuid
 
 from . import __version__
-from .common import RelayError, atomic_json, digest, identifier, integer, json_bytes, private_dir, read_json, require, strict_json
+from .common import RelayError, atomic_json, digest, identifier, integer, json_bytes, private_dir, read_json, read_json_record, require, strict_json
 from .config import data_home, load_config, validate_config
 from .credentials import get_key, has_key
 from .providers import ProviderError, complete
@@ -281,7 +282,7 @@ class Relay:
     def run(self, plan_id: str) -> dict:
         directory = self._dir(plan_id)
         with self._lock:
-            if (directory / "claimed").exists():
+            if (directory / "claimed").exists() or (directory / "cancelled").exists():
                 return self.job(plan_id)
             self._fresh()
             plan = read_json(directory / "plan.json")
@@ -443,7 +444,8 @@ class Relay:
         path = directory / "run.json"
         if not path.exists():
             return {"plan_id": plan_id, "state": "interrupted_or_starting" if (directory / "claimed").exists() else "planned",
-                    "retry_policy": "Never automatically resend a claimed plan."}
+                    "retry_policy": "Never automatically resend a claimed or cancelled plan.",
+                    **({"cancellation_requested": True} if (directory / "cancelled").exists() else {})}
         record = read_json(path)
         local = self._active.get(plan_id)
         if record["state"] in {"queued", "running"} and local is None:
@@ -458,7 +460,9 @@ class Relay:
         require(not (directory / "cancelled").exists(), "cancelled", "Candidates from a cancelled batch are not available for application.")
         path = directory / (task_id + ".candidate.json")
         require(path.exists(), "no_candidate", "This task has no candidate available for review.")
-        candidate = read_json(path)
+        candidate, artifact_bytes = read_json_record(path)
+        artifact = {"path": str(path), "media_type": "application/json",
+                    "size_bytes": len(artifact_bytes), "sha256": hashlib.sha256(artifact_bytes).hexdigest()}
         plan = read_json(directory / "plan.json")
         try:
             root = workspace_root(plan["workspace"], self.config["workspaces"])
@@ -467,6 +471,7 @@ class Relay:
         except RelayError:
             candidate["source_still_matches"] = False
         candidate["artifact_path"] = str(path)
+        candidate["artifact"] = artifact
         return candidate
 
     def cancel(self, plan_id: str) -> dict:

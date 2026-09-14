@@ -78,7 +78,7 @@ def atomic_bytes(path: Path, value: bytes) -> None:
             os.unlink(temporary)
 
 
-def read_json(path: Path, limit: int = 8 * 1024 * 1024):
+def read_json_record(path: Path, limit: int = 8 * 1024 * 1024):
     no_links(path)
     for attempt in range(25):
         try:
@@ -91,9 +91,13 @@ def read_json(path: Path, limit: int = 8 * 1024 * 1024):
             time.sleep(0.01)
     require(len(data) <= limit, "size_limit", "Local record exceeds the size limit.")
     try:
-        return strict_json(data)
+        return strict_json(data), data
     except (ValueError, UnicodeError) as exc:
         raise RelayError("invalid_record", "Local JSON record is invalid.") from exc
+
+
+def read_json(path: Path, limit: int = 8 * 1024 * 1024):
+    return read_json_record(path, limit)[0]
 
 
 def strict_json(value):

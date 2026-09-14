@@ -10,6 +10,8 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from code_relay.contracts import validate_output
 
 
 def main():
@@ -38,13 +40,19 @@ def main():
         assert len(responses) == 6
         assert responses[0]["result"]["protocolVersion"] == "2025-11-25"
         assert len(responses[1]["result"]["tools"]) == 7
+        assert all(t["outputSchema"]["type"] == "object" and t["outputSchema"]["anyOf"]
+                   for t in responses[1]["result"]["tools"])
         status = responses[2]["result"]
         assert not status["isError"] and not status["structuredContent"]["network_enabled"]
         assert status["structuredContent"]["profiles"] == []
         assert responses[3]["result"]["isError"] and responses[4]["result"]["isError"]
+        for tool, response in zip(("relay_status", "relay_run", "relay_status"), responses[2:5]):
+            payload = response["result"]
+            validate_output(tool, payload["structuredContent"])
+            assert json.loads(payload["content"][0]["text"]) == payload["structuredContent"]
         assert responses[5]["error"]["code"] == -32601
         assert result.stderr == b"", result.stderr
-        print("PASS: real stdio initialize/list/call, 7 tools, structured status, invalid arguments, method errors; no API calls.")
+        print("PASS: real stdio initialize/list/call, 7 output schemas, validated status/errors and JSON fallback; no API calls.")
 
 
 if __name__ == "__main__":
