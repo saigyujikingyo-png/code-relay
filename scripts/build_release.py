@@ -59,7 +59,8 @@ def main():
         assert tcl_files, "Bundled Tcl/Tk licences must be included."
         with zipfile.ZipFile(package, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.write(binary, "code-relay/code-relay.exe")
-            for name in ["LICENSE", "README.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md", "docs/PRIVACY.md"]:
+            for name in ["LICENSE", "README.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md", "docs/PRIVACY.md",
+                         "docs/ARCHITECTURE.md", "docs/OUTPUT_CONTRACTS.md"]:
                 archive.write(ROOT / name, "code-relay/" + name)
             archive.write(python_license, "code-relay/licenses/CPython-LICENSE.txt")
             for file in tcl_files:

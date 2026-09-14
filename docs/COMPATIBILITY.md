@@ -8,7 +8,7 @@ Version: 0.1.0 preview. Each row requires its own evidence.
 | OpenAI-compatible Chat Completions | Exact model IDs; configurable token parameter | Synthetic HTTP integration; live endpoints unverified |
 | Anthropic Messages | Independent adapter, key and version header | Synthetic HTTP integration; live endpoint unverified |
 | ELM multiple models | Shared endpoint/key reference with per-model profiles | Official OpenAI-compatible example checked; endpoint, OPUS/SOL/TERRA/QWEN IDs and account entitlements unverified |
-| Codex plugin | Manifest, seven MCP tools with validated output schemas, workflow skill | Local installation/stdio and model-session results recorded separately |
+| Codex plugin | Manifest, seven MCP tools with validated output schemas, workflow skill | Installed runtime/stdio and real model status call passed; constrained status-only workflow had an extra read-only call; full coding workflow unverified |
 | Windows x64 package | Runtime-bundled executable and local settings | Build and executable checks recorded separately |
 | Linux/macOS settings | Source runtime; environment keys | GUI/system acceptance unverified |
 | Other stdio MCP hosts | Same shared core | Connection and model acceptance unverified |
