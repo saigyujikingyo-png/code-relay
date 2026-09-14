@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.build-venv/
+build/
+dist/
+*.egg-info/
+.code-relay/
+.env*
+*.dpapi
+local-config*.json
+coverage/

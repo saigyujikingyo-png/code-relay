@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chembridge-code-relay"
+version = "0.1.0"
+description = "Host-led coding delegation to user-configured API models"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = []
+
+[project.scripts]
+code-relay = "code_relay.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["code_relay*"]

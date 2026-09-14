@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "code-relay": {
+      "command": "python",
+      "args": [
+        "-c",
+        "import os,sys,runpy; root=os.environ.get('CLAUDE_PLUGIN_ROOT') or os.environ.get('CODEX_PLUGIN_ROOT') or os.getcwd(); sys.path.insert(0,root); sys.argv=['code-relay','serve']; runpy.run_module('code_relay',run_name='__main__')"
+      ]
+    }
+  }
+}

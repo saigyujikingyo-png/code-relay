@@ -1,0 +1,28 @@
+{
+  "name": "code-relay",
+  "version": "0.1.0",
+  "description": "Host-led coding delegation to user-configured API models.",
+  "author": {
+    "name": "Chembridge contributors"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Code Relay",
+    "shortDescription": "Delegate repetitive code. Keep host review.",
+    "longDescription": "Use Codex for architecture, complex coding and review while bounded API workers prepare candidate changes. Supports multiple user-configured OpenAI-compatible, ELM and Anthropic model profiles with independent credentials.",
+    "developerName": "Chembridge contributors",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Delegate routine coding to my configured API models.",
+      "Plan a safe batch of test and documentation tasks.",
+      "Review the candidate changes from my API workers."
+    ]
+  }
+}
