@@ -2,7 +2,7 @@
 
 Code Relay lets a Codex host model own architecture, complex implementation and final review while dispatching bounded, repetitive coding tasks to user-configured API models.
 
-**0.1.0 preview.** The runtime uses Python's standard library and MCP over stdio. OpenAI-compatible endpoints and Anthropic Messages are separate protocol adapters. Multiple model profiles can share an endpoint and credential, including an ELM connection supplied by an authorised University of Edinburgh user. Model names are exact user-provided identifiers; availability is never inferred from a brand.
+**0.1.1 preview.** The runtime uses Python's standard library and MCP over stdio. OpenAI-compatible endpoints and Anthropic Messages are separate protocol adapters. Multiple model profiles can share an endpoint and credential, including an ELM connection supplied by an authorised University of Edinburgh user. Model names are exact user-provided identifiers; availability is never inferred from a brand.
 
 The plugin does not read or depend on ChatGPT account sessions. The selected host has its own authentication requirements. Workers receive only explicitly selected project files and return candidate replacements. They cannot execute commands, modify the workspace, approve their own output, publish changes or call other tools.
 
@@ -14,7 +14,7 @@ The local workflow includes frozen source snapshots, bounded parallel calls, per
 
 ELM users may configure multiple OPUS, SOL, TERRA, QWEN or other profiles using their actual endpoint and API model identifiers. Their current availability and permissions have not been verified. No paid API or live ELM call is included in the synthetic acceptance results, and no token-cost saving or Terra max benchmark is claimed.
 
-All seven tools publish versioned output schemas and validate results before delivery. Null usage or cost means unavailable; candidate artifact metadata does not establish correctness or host delivery. See [output contracts](docs/OUTPUT_CONTRACTS.md), [installation and recovery](docs/INSTALL.md), [architecture](docs/ARCHITECTURE.md), [compatibility](docs/COMPATIBILITY.md), [privacy](docs/PRIVACY.md) and the [acceptance record](https://github.com/saigyujikingyo-png/code-relay/blob/v0.1.0/verification/2026-09-14-preview.md).
+All seven tools publish versioned output schemas and validate results before delivery. Null usage or cost means unavailable; candidate artifact metadata does not establish correctness or host delivery. See [output contracts](docs/OUTPUT_CONTRACTS.md), [installation and recovery](docs/INSTALL.md), [architecture](docs/ARCHITECTURE.md), [compatibility](docs/COMPATIBILITY.md), [privacy](docs/PRIVACY.md) and the [acceptance record](https://github.com/saigyujikingyo-png/code-relay/blob/v0.1.1/verification/2026-09-14-preview-0.1.1.md).
 
 For development, use Python 3.11+ and run:
 

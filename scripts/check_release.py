@@ -14,7 +14,7 @@ required = [
 for relative in required:
     assert (ROOT / relative).is_file(), f"Missing release entrypoint: {relative}"
 manifest = json.loads((ROOT / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
-assert manifest["name"] == "code-relay" and manifest["version"] == "0.1.0"
+assert manifest["name"] == "code-relay" and manifest["version"] == "0.1.1"
 assert manifest["license"] == "MIT" and manifest["mcpServers"] == "./.mcp.json"
 assert manifest["skills"] == "./skills/"
 assert "Rule version: **2026-09-14.1**" in (ROOT / "DEVELOPMENT_PRINCIPLES.md").read_text(encoding="utf-8")

@@ -1,6 +1,6 @@
 # Compatibility and acceptance
 
-Version: 0.1.0 preview. Each row requires its own evidence.
+Version: 0.1.1 preview. Each row requires its own evidence.
 
 | Surface | Implementation | Acceptance |
 | --- | --- | --- |

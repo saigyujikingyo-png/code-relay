@@ -230,9 +230,12 @@ class Relay:
             try:
                 descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
                 break
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
+                # Windows may report access denied while another handle is
+                # closing/deleting this exclusive lock. Retrying local lock
+                # acquisition cannot resend a provider request.
                 time.sleep(0.01)
-        require(descriptor is not None, "budget_busy", "Local budget is busy; read job status before retrying. A stale lock requires recovery.")
+        require(descriptor is not None, "budget_busy", "Local budget lock is busy or inaccessible; read job status before retrying. A stale lock requires recovery.")
         try:
             yield
         finally:

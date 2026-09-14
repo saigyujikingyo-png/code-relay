@@ -13,6 +13,7 @@ from pathlib import Path
 import tempfile
 import threading
 import time
+import traceback
 import unittest
 from unittest.mock import patch
 
@@ -202,7 +203,8 @@ class BoundaryTests(unittest.TestCase):
         a, a_outcome = self.launch(lambda: submit(first), "boundary-submit-a")
         b, b_outcome = self.launch(lambda: submit(second), "boundary-submit-b")
         start.wait(timeout=3)
-        self.assertTrue(entered.wait(3))
+        self.assertTrue(entered.wait(3),
+                        f"Dispatch did not start: {[(kind, str(value)) for kind, value in a_outcome + b_outcome]!r}, {first.job(plan['plan_id'])!r}")
         self.join(a)
         self.join(b)
         self.assertEqual(len(self.calls), 1)
@@ -210,7 +212,7 @@ class BoundaryTests(unittest.TestCase):
         # It may report busy, but must never make another paid attempt.
         for kind, value in a_outcome + b_outcome:
             if kind == "error":
-                self.assertIsInstance(value, RelayError)
+                self.assertIsInstance(value, RelayError, "".join(traceback.format_exception(value)))
                 self.assertEqual(value.code, "run_busy")
         release.set()
         status = self.wait_terminal(first, plan["plan_id"])
@@ -219,6 +221,46 @@ class BoundaryTests(unittest.TestCase):
         second.run(plan["plan_id"])
         self.assertEqual(len(self.calls), 1)
         self.assertEqual(status["submission_attempts"], 1)
+
+    def test_transient_lock_access_denial_recovers_without_duplicate_dispatch(self):
+        plan = self.relay.plan(str(self.root), [self.task()])
+        real_open = os.open
+        denied = []
+
+        def briefly_denied(path, *args, **kwargs):
+            if Path(path) == self.state / "budget.lock" and len(denied) < 3:
+                denied.append(path)
+                raise PermissionError(13, "Synthetic lock access denial", str(path))
+            return real_open(path, *args, **kwargs)
+
+        with patch("code_relay.core.os.open", side_effect=briefly_denied):
+            self.relay.run(plan["plan_id"])
+            status = self.wait_terminal(self.relay, plan["plan_id"])
+        self.assertEqual(len(denied), 3)
+        self.assertEqual(status["state"], "completed")
+        self.assertEqual(status["submission_attempts"], 1)
+        self.assertEqual(len(self.calls), 1)
+
+    def test_persistent_lock_access_denial_is_bounded_and_does_not_dispatch(self):
+        plan = self.relay.plan(str(self.root), [self.task()])
+        real_open = os.open
+        denied = []
+
+        def always_denied(path, *args, **kwargs):
+            if Path(path) == self.state / "budget.lock":
+                denied.append(path)
+                raise PermissionError(13, "Synthetic lock access denial", str(path))
+            return real_open(path, *args, **kwargs)
+
+        with patch("code_relay.core.os.open", side_effect=always_denied):
+            with self.assertRaises(RelayError) as failure:
+                self.relay.run(plan["plan_id"])
+        self.assertEqual(failure.exception.code, "budget_busy")
+        self.assertLessEqual(len(denied), 25)
+        self.assertGreater(len(denied), 0)
+        self.assertEqual(self.calls, [])
+        self.assertFalse((self.state / "budget.json").exists())
+        self.assertFalse((self.state / plan["plan_id"] / "claimed").exists())
 
     def test_different_runs_share_one_active_batch_and_never_exceed_parallel_limit(self):
         entered = self.gate()

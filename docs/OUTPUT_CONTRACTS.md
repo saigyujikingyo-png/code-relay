@@ -89,4 +89,4 @@ the JSON fallback. It runs for source and the bundled executable. This is
 protocol acceptance, not a Codex model workflow or a live API/model benchmark.
 Schema catalog bytes are recorded in the release receipt; they do not establish
 quota savings. See [compatibility](COMPATIBILITY.md) and the dated
-[release evidence](https://github.com/saigyujikingyo-png/code-relay/blob/v0.1.0/verification/2026-09-14-preview.md) for actual results.
+[release evidence](https://github.com/saigyujikingyo-png/code-relay/blob/v0.1.1/verification/2026-09-14-preview-0.1.1.md) for actual results.
