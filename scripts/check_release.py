@@ -10,6 +10,8 @@ required = [
     ".codex-plugin/plugin.json", ".mcp.json", "skills/code-relay/SKILL.md",
     "docs/ARCHITECTURE.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md", "docs/PRIVACY.md",
     "scripts/setup_codex_cloud.sh", "docs/OUTPUT_CONTRACTS.md",
+    "CLOUD_STORAGE.md", "RUNTIME_LIFECYCLE.md", "governance/OWNERSHIP.md",
+    "templates/LIFECYCLE_RECORD.md", "governance/incidents/CB-2026-001.md", "docs/LIFECYCLE.md",
 ]
 for relative in required:
     assert (ROOT / relative).is_file(), f"Missing release entrypoint: {relative}"
@@ -17,7 +19,7 @@ manifest = json.loads((ROOT / ".codex-plugin/plugin.json").read_text(encoding="u
 assert manifest["name"] == "code-relay" and manifest["version"] == "0.1.1"
 assert manifest["license"] == "MIT" and manifest["mcpServers"] == "./.mcp.json"
 assert manifest["skills"] == "./skills/"
-assert "Rule version: **2026-09-14.1**" in (ROOT / "DEVELOPMENT_PRINCIPLES.md").read_text(encoding="utf-8")
+assert "Rule version: **2026-09-19.1**" in (ROOT / "DEVELOPMENT_PRINCIPLES.md").read_text(encoding="utf-8")
 assert len(manifest["interface"]["defaultPrompt"]) <= 3
 for code in [*ROOT.glob("code_relay/*.py"), *ROOT.glob("scripts/*.py"), *ROOT.glob("tests/*.py")]:
     ast.parse(code.read_text(encoding="utf-8"), filename=str(code))

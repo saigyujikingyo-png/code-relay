@@ -15,6 +15,8 @@ VERSION = "0.1.1"
 TOP_FILES = [
     "AGENTS.md", "DEVELOPMENT_PRINCIPLES.md", "README.md", "LICENSE", ".gitignore",
     "pyproject.toml", "build-requirements.txt", ".mcp.json", ".codex-plugin/plugin.json",
+    "CLOUD_STORAGE.md", "RUNTIME_LIFECYCLE.md", "governance/OWNERSHIP.md",
+    "templates/LIFECYCLE_RECORD.md", "governance/incidents/CB-2026-001.md",
 ]
 DIRECTORIES = ["code_relay", "scripts", "skills", "docs", "tests", "verification", ".github"]
 
@@ -60,7 +62,13 @@ def main():
         with zipfile.ZipFile(package, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.write(binary, "code-relay/code-relay.exe")
             for name in ["LICENSE", "README.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md", "docs/PRIVACY.md",
-                         "docs/ARCHITECTURE.md", "docs/OUTPUT_CONTRACTS.md"]:
+                         "docs/ARCHITECTURE.md", "docs/OUTPUT_CONTRACTS.md", "docs/LIFECYCLE.md",
+                         "DEVELOPMENT_PRINCIPLES.md", "CLOUD_STORAGE.md", "RUNTIME_LIFECYCLE.md",
+                         "governance/OWNERSHIP.md", "templates/LIFECYCLE_RECORD.md",
+                         "governance/incidents/CB-2026-001.md",
+                         "verification/2026-09-19-rules-adoption.md",
+                         "verification/2026-09-14-preview-0.1.1.md",
+                         "verification/2026-09-14-preview.md"]:
                 archive.write(ROOT / name, "code-relay/" + name)
             archive.write(python_license, "code-relay/licenses/CPython-LICENSE.txt")
             for file in tcl_files:

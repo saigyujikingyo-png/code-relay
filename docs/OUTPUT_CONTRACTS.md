@@ -1,6 +1,6 @@
 # Tool output contracts
 
-Public contract version: **1.0**. Shared rule baseline: **2026-09-14.1**, section 12.
+Public contract version: **1.0** (unchanged). Shared rule baseline: **2026-09-19.1**, section 12. This documentation adoption does not refresh historical contract-test evidence or establish runtime lifecycle conformance.
 
 Each of the seven MCP tools publishes a meaningful `outputSchema` through
 `tools/list`. The schemas and the server validator share the definitions in

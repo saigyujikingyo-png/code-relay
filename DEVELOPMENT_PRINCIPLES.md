@@ -1,6 +1,6 @@
 # Chembridge development and delivery principles
 
-Rule version: **2026-09-14.1**. These requirements were explicitly requested by the user and apply to all Chembridge university convenience plugins, specialist software plugins and agent workflow automation plugins, not only Origin Companion. New plugins start with these defaults; users should not have to repeat them in each task. New task-specific user instructions take precedence.
+Rule version: **2026-09-19.1**. These requirements were explicitly requested by the user and apply to all Chembridge university convenience plugins, specialist software plugins and agent workflow automation plugins, not only Origin Companion. New plugins start with these defaults; users should not have to repeat them in each task. New task-specific user instructions take precedence.
 
 ## 1. GitHub distribution
 
@@ -126,3 +126,15 @@ Every existing and future Chembridge plugin must implement explicit machine-read
 - **Track completion:** each product must maintain per-tool and per-operation coverage, recording implemented, verified and pending work. New plugins and new/changed tools must meet this requirement before their interface is declared complete. Existing gaps belong in the next compatible release plan, with clear owners and acceptance evidence; do not relabel earlier acceptance as schema compliance. Skills and installation guidance must describe discovery, result meanings and compatibility behavior.
 
 Reference: [MCP tool results and output schemas](https://modelcontextprotocol.io/specification/2025-11-25/server/tools#output-schema). Structured tool results describe server-produced data; they do not constrain model generation or establish scientific correctness by themselves.
+
+## 13. Runtime and connection lifecycle
+
+Follow [Runtime and connection lifecycle contract 1.0](RUNTIME_LIFECYCLE.md). Each product declares component lifecycle classes, startup/shutdown/crash owners, canonical account/profile/session scope, daemon/child cardinality, readiness/health, retry reconciliation, host-disconnect and OS-event semantics, and installation/upgrade/removal behavior. One remote profile plus canonical directory must not have competing active tunnel/MCP owners. Reconcile an attempt that may have spawned before retrying; preserve ambiguous ownership and uncertain scientific or billed operations instead of replaying them.
+
+Use the [product lifecycle record](templates/LIFECYCLE_RECORD.md) or an equivalent compact product-owned record. On-demand tools need not autostart. A durable job service must state its actual failure-survival scope. Local runtime/tunnel health, remote account binding, fresh tool discovery, real calls and native/live-service outcomes are separate acceptance gates. Existing products record migration gaps rather than inheriting compliance from a shared rule or another product's tests.
+
+## 14. Governance and development ownership
+
+Follow [Governance and product ownership](governance/OWNERSHIP.md): Astra High owns shared architecture and incident review; one Astra Max task owns each product's long-term development; Astra Ultra supplies bounded exceptional consultations only. Verify actual model/effort and preserve safe checkpoints, explicit handoffs and Max takeover receipts before retiring an owner. Existing product constraints and source/branch ownership remain in force. The Terra max end-user benchmark in section 4 remains separate.
+
+Cross-product incidents close only after applicable source, package, installed runtime, native, host, OS-event and migration gates have evidence. Publishing principles or passing portable tests alone cannot close an incident. Recheck current source and applicable runtime/connection state each work cycle; preserve historical evidence as historical.

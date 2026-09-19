@@ -26,6 +26,10 @@ One profile describes one model. Profiles can share an API endpoint and key refe
 - No worker shell, workspace write, automatic test execution, git mutation, deployment or publication.
 - Local receipts contain private source and must stay outside public source and releases.
 
+## Runtime lifetime
+
+The stdio frontend is an on-demand local companion. Normal EOF requests cancellation of the current in-process batch; persisted submission claims prevent automatic resend but do not supervise execution across host exit or reboot. Exceptional disconnect and ownership recovery have open, unreproduced risks. See the [lifecycle record and backlog](LIFECYCLE.md) for declared owners, readiness, OS events and separate acceptance gates.
+
 ## Evidence
 
 Portable tests, loopback protocol tests, an executable package, installed host tool discovery, live provider calls, model quality and a Terra max benchmark are separate acceptance layers. A synthetic result cannot establish a real model's suitability or a university entitlement.
