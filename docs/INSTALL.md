@@ -22,6 +22,10 @@ Use an environment-variable key reference on Linux/macOS; this preview does not 
 
 Install the new release through the same settings window. Configuration, credentials, unrelated plugins and old versioned runtimes are preserved. Installation metadata backups are saved under the user's `.code-relay-install-backups` directory. Reinstall a previous release to roll back, then start a new Codex task.
 
+The documentation-installation refresh retains runtime version 0.1.1. The installer now includes the public governance rules, lifecycle record and offline guides in both the plugin source and the host-managed copy. Existing public documents are backed up before replacement. Source-install cache versions include document content; frozen installs use the executable hash, including bundled resources. A new cache suffix identifies installed content, not a new provider/runtime capability.
+
+Updates to an existing marketplace entry leave that marketplace file unchanged. Configuration, credentials, budget reservations and job receipts are outside the install payload. If required documents are missing, installation stops before changing the plugin. Use the supported installer and normal host reload/new-task pickup; do not edit internal caches. Existing tasks may keep their previously loaded runtime until that boundary.
+
 Remove Code Relay through Codex's plugin UI or `codex plugin remove code-relay@personal` (substitute the actual personal marketplace name). Local settings and job receipts remain available; remove them deliberately only when no run is active. There is no automatic uninstaller for retained data in this preview.
 
 Settings live in the platform's CodeRelay local data folder. Job records contain selected source and candidates. Archive or remove old receipts there when the configured storage limit is reached; never publish that directory.

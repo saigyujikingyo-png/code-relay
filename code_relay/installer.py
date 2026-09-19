@@ -15,6 +15,19 @@ from . import __version__
 from .common import RelayError, atomic_bytes, atomic_json, no_links, private_dir, read_json, require
 
 
+# Public install payload shared by the installer and frozen package builder.
+INSTALL_FILES = (
+    "skills/code-relay/SKILL.md", "LICENSE", "README.md", "AGENTS.md",
+    "DEVELOPMENT_PRINCIPLES.md", "CLOUD_STORAGE.md", "RUNTIME_LIFECYCLE.md",
+    "governance/OWNERSHIP.md", "governance/incidents/CB-2026-001.md",
+    "templates/LIFECYCLE_RECORD.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md",
+    "docs/PRIVACY.md", "docs/ARCHITECTURE.md", "docs/OUTPUT_CONTRACTS.md",
+    "docs/LIFECYCLE.md", "verification/2026-09-19-rules-adoption.md",
+    "verification/2026-09-19-document-install.md",
+    "verification/2026-09-14-preview-0.1.1.md", "verification/2026-09-14-preview.md",
+)
+
+
 def install_file(source: Path, destination: Path):
     no_links(source)
     no_links(destination)
@@ -47,6 +60,16 @@ def install(*, user_home: Path | None = None, source: Path | None = None, runner
                 "target_conflict", "The target folder is already used by another installation or local files.")
     manifest = read_json(source / ".codex-plugin" / "plugin.json")
     require(manifest.get("name") == "code-relay", "invalid_package", "This package has an unexpected plugin identity.")
+    # Validate the complete public payload before changing an installation.
+    for relative in INSTALL_FILES:
+        origin = source / relative
+        output = target / relative
+        no_links(origin)
+        no_links(output)
+        require(origin.is_file(), "invalid_package", "A required installation document is missing.")
+        if output.exists():
+            require(output.is_file() and output.stat().st_nlink == 1,
+                    "target_conflict", "An installation document destination is linked or not an ordinary file.")
     listing = read_json(market) if market.exists() else {
         "name": "personal", "interface": {"displayName": "Personal"}, "plugins": []}
     require(isinstance(listing, dict) and isinstance(listing.get("plugins"), list) and
@@ -70,6 +93,11 @@ def install(*, user_home: Path | None = None, source: Path | None = None, runner
             private_dir(backup)
             no_links(previous)
             install_file(previous, backup / ("marketplace.json" if previous == market else previous.name))
+    for relative in INSTALL_FILES:
+        previous = target / relative
+        if previous.exists():
+            private_dir(backup / "resources" / Path(relative).parent)
+            install_file(previous, backup / "resources" / relative)
     if getattr(sys, "frozen", False):
         binary = Path(sys.executable)
         full_hash = hashlib.sha256(binary.read_bytes()).hexdigest()
@@ -93,12 +121,16 @@ def install(*, user_home: Path | None = None, source: Path | None = None, runner
         command = sys.executable
         arguments = ["-c", "import sys,runpy; sys.path.insert(0," + repr(str(destination)) +
                      "); sys.argv=['code-relay','serve']; runpy.run_module('code_relay',run_name='__main__')"]
-        checksum = hashlib.sha256(b"".join(p.read_bytes() for p in sorted((source / "code_relay").glob("*.py")))).hexdigest()[:12]
+        inputs = [*(source / "code_relay").glob("*.py"),
+                  source / ".codex-plugin/plugin.json", *(source / name for name in INSTALL_FILES)]
+        content = {p.relative_to(source).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in inputs}
+        checksum = hashlib.sha256(json.dumps(content, sort_keys=True).encode("utf-8")).hexdigest()[:12]
     # Content-based version suffix refreshes the host cache without changing product version.
     manifest["version"] = __version__ + "+codex." + checksum
     atomic_json(target / ".codex-plugin" / "plugin.json", manifest)
     atomic_json(target / ".mcp.json", {"mcpServers": {"code-relay": {"command": command, "args": arguments}}})
-    for relative in ["skills/code-relay/SKILL.md", "LICENSE", "README.md"]:
+    for relative in INSTALL_FILES:
         origin = source / relative
         no_links(origin)
         output = target / relative
@@ -107,7 +139,9 @@ def install(*, user_home: Path | None = None, source: Path | None = None, runner
         install_file(origin, output)
     if not existing:
         listing["plugins"].append(entry)
-    atomic_json(market, listing)
+        atomic_json(market, listing)
+    # An existing entry already points at this source. Do not rewrite another
+    # installer's concurrent marketplace changes or user formatting on update.
     kwargs = {"capture_output": True, "text": True, "timeout": 45}
     if os.name == "nt":
         kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW

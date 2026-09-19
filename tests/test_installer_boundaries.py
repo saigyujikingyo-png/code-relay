@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 from code_relay import __version__
 from code_relay.common import RelayError
-from code_relay.installer import install
+from code_relay.installer import INSTALL_FILES, install
 
 
 class InstallerBoundaryTests(unittest.TestCase):
@@ -28,7 +28,8 @@ class InstallerBoundaryTests(unittest.TestCase):
             (self.source / relative).mkdir(parents=True, exist_ok=True)
         (self.source / ".codex-plugin/plugin.json").write_text(
             json.dumps({"name": "code-relay", "version": __version__}), encoding="utf-8")
-        for relative in ["skills/code-relay/SKILL.md", "README.md", "LICENSE"]:
+        for relative in INSTALL_FILES:
+            (self.source / relative).parent.mkdir(parents=True, exist_ok=True)
             (self.source / relative).write_text("Synthetic package resource.\n", encoding="utf-8")
         (self.source / "code_relay/core.py").write_text(
             "SYNTHETIC_PACKAGE_CODE = True\n", encoding="utf-8")

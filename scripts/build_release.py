@@ -11,6 +11,9 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from code_relay.installer import INSTALL_FILES
+
 VERSION = "0.1.1"
 TOP_FILES = [
     "AGENTS.md", "DEVELOPMENT_PRINCIPLES.md", "README.md", "LICENSE", ".gitignore",
@@ -45,9 +48,10 @@ def main():
                      "--paths", str(ROOT), "--specpath", str(ROOT / "build"),
                      "--workpath", str(ROOT / "build" / "pyinstaller"),
                      "--distpath", str(dist / "windows"), "--log-level", "WARN"]
-        for relative in [".codex-plugin", "skills", "LICENSE", "README.md"]:
+        for relative in [".codex-plugin", *INSTALL_FILES]:
             path = ROOT / relative
-            destination = "plugin_resources/" + relative if path.is_dir() else "plugin_resources"
+            destination = (Path("plugin_resources") /
+                           (Path(relative) if path.is_dir() else Path(relative).parent)).as_posix()
             arguments += ["--add-data", str(path) + ":" + destination]
         arguments += [str(ROOT / "scripts/entry.py")]
         subprocess.run(arguments, cwd=ROOT, check=True)
@@ -61,14 +65,7 @@ def main():
         assert tcl_files, "Bundled Tcl/Tk licences must be included."
         with zipfile.ZipFile(package, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.write(binary, "code-relay/code-relay.exe")
-            for name in ["LICENSE", "README.md", "docs/INSTALL.md", "docs/COMPATIBILITY.md", "docs/PRIVACY.md",
-                         "docs/ARCHITECTURE.md", "docs/OUTPUT_CONTRACTS.md", "docs/LIFECYCLE.md",
-                         "DEVELOPMENT_PRINCIPLES.md", "CLOUD_STORAGE.md", "RUNTIME_LIFECYCLE.md",
-                         "governance/OWNERSHIP.md", "templates/LIFECYCLE_RECORD.md",
-                         "governance/incidents/CB-2026-001.md",
-                         "verification/2026-09-19-rules-adoption.md",
-                         "verification/2026-09-14-preview-0.1.1.md",
-                         "verification/2026-09-14-preview.md"]:
+            for name in INSTALL_FILES:
                 archive.write(ROOT / name, "code-relay/" + name)
             archive.write(python_license, "code-relay/licenses/CPython-LICENSE.txt")
             for file in tcl_files:
